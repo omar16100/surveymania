@@ -7,7 +7,9 @@ import Link from 'next/link'
 import { queueSubmission, processQueue } from '@/lib/offlineQueue'
 import { isQuestionVisible, type QuestionLogic } from '@/lib/logic-engine'
 import { applyPiping, type PipingContext } from '@/lib/piping'
-import ProgressBar from '@/components/ProgressBar'
+import { SurveyProgress } from '@/components/SurveyProgress'
+import { SurveyQuestionRenderer } from '@/components/SurveyQuestionRenderer'
+import { SurveySubmitButton } from '@/components/SurveySubmitButton'
 import LocationDiagnostics from '@/components/LocationDiagnostics'
 
 type ValidationRule = {
@@ -174,6 +176,8 @@ export default function PublicSurveyPage({ params }: { params: { id: string } })
   const [survey, setSurvey] = useState<Survey | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [submitState, setSubmitState] = useState<'default' | 'loading' | 'success' | 'error'>('default')
+  const [submitError, setSubmitError] = useState<string>('')
   const [geo, setGeo] = useState<{ latitude: number; longitude: number; accuracy?: number } | null>(null)
   const [geoError, setGeoError] = useState<string | null>(null)
   const [geoLoading, setGeoLoading] = useState(false)
@@ -262,6 +266,8 @@ export default function PublicSurveyPage({ params }: { params: { id: string } })
   async function onSubmit(values: Record<string, any>) {
     if (!survey) return
     setSubmitting(true)
+    setSubmitState('loading')
+    setSubmitError('')
     try {
       // generate or re-use session id
       let sessionId = localStorage.getItem('sm_session')
@@ -310,7 +316,11 @@ export default function PublicSurveyPage({ params }: { params: { id: string } })
 
       // If location is required but unavailable, block submit with message
       if (survey.settings?.locationRequired && !geo) {
-        setError(geoError || 'Location is required to submit this survey.')
+        const errorMsg = geoError || 'Location is required to submit this survey.'
+        setError(errorMsg)
+        setSubmitState('error')
+        setSubmitError(errorMsg)
+        setSubmitting(false)
         return
       }
 
@@ -338,8 +348,13 @@ export default function PublicSurveyPage({ params }: { params: { id: string } })
         const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
         const data = await res.json()
         if (!res.ok) throw new Error(data?.error || 'Failed to submit')
+
+        // Show success state briefly before redirect
+        setSubmitState('success')
         localStorage.setItem('sm_thankyou', JSON.stringify(thankYouData))
-        window.location.href = `/s/${survey.id}/thanks`
+        setTimeout(() => {
+          window.location.href = `/s/${survey.id}/thanks`
+        }, 800)
       } catch (e) {
         // Network error: queue it
         await queueSubmission(endpoint, payload)
@@ -349,47 +364,62 @@ export default function PublicSurveyPage({ params }: { params: { id: string } })
         window.location.href = `/s/${survey.id}/thanks`
       }
     } catch (e: any) {
-      setError(e.message)
+      const errorMsg = e.message || 'An unexpected error occurred'
+      setError(errorMsg)
+      setSubmitState('error')
+      setSubmitError(errorMsg)
     } finally {
       setSubmitting(false)
     }
   }
 
-  if (error) return <div className="space-y-4"><p className="text-red-600">{error}</p><Link className="btn" href="/">Back</Link></div>
-  if (!survey) return <p>Loading…</p>
-  if (survey.status !== 'active') return <div className="space-y-2"><h1 className="text-xl font-semibold">{survey.title}</h1><p className="text-gray-600">This survey isn’t accepting responses.</p></div>
+  if (error) return <div className="min-h-screen bg-surface-alt flex items-center justify-center px-4"><div className="space-y-4 text-center"><p className="text-red-600">{error}</p><Link className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-control text-sm font-medium transition-all duration-200 ease-out focus-visible:outline-none focus-visible:shadow-focus-ring bg-purple text-white shadow-elevation-1 hover:bg-purple-dark hover:shadow-elevation-2 min-h-[48px] px-6 py-3" href="/">Back</Link></div></div>
+  if (!survey) return <div className="min-h-screen bg-surface-alt flex items-center justify-center"><p className="text-[var(--gform-color-text-secondary)]">Loading…</p></div>
+  if (survey.status !== 'active') return <div className="min-h-screen bg-surface-alt flex items-center justify-center px-4"><div className="space-y-2 text-center"><h1 className="text-xl font-semibold text-[var(--gform-color-text)]">{survey.title}</h1><p className="text-[var(--gform-color-text-secondary)]">This survey isn't accepting responses.</p></div></div>
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">{survey.title}</h1>
-        {survey.description && <p className="text-gray-600">{survey.description}</p>}
-      </div>
-      {!online && (
-        <div className="rounded-md border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800">
-          You are offline. Submissions will be queued and synced when back online.
-        </div>
-      )}
+    <div className="min-h-screen bg-surface-alt scroll-smooth">
+      {/* Floating Progress Bar */}
       {visibleQuestions.length > 0 && (
-        <ProgressBar
-          current={answeredCount}
-          total={visibleQuestions.length}
-          showCount={true}
+        <SurveyProgress
+          currentQuestion={answeredCount}
+          totalQuestions={visibleQuestions.length}
+          showPercentage={false}
         />
       )}
-      {survey.settings?.locationRequired && (
-        <LocationDiagnostics
-          location={geo}
-          loading={geoLoading}
-          error={geoError}
-        />
-      )}
-      {survey.settings?.locationRequired && geoError && !manualLocation && (
-        <div className="rounded-md border border-red-300 bg-red-50 p-3 space-y-3">
-          <p className="text-sm text-red-700">{geoError}</p>
-          <div className="flex gap-2">
-            <button
-              className="btn btn-sm"
+
+      {/* Main Content Container */}
+      <div className="mx-auto max-w-[640px] px-4 md:px-8 py-12 pt-16">
+        {/* Survey Header */}
+        <div className="mb-12 space-y-3">
+          <h1 className="font-display text-3xl font-bold leading-tight tracking-tight text-[var(--gform-color-text)]">{survey.title}</h1>
+          {survey.description && <p className="text-base text-[var(--gform-color-text-secondary)] leading-relaxed">{survey.description}</p>}
+        </div>
+
+        {/* Offline Warning */}
+        {!online && (
+          <div className="mb-8 rounded-control border-[1.5px] border-yellow-300 bg-yellow-50 p-4 text-sm text-yellow-800">
+            You are offline. Submissions will be queued and synced when back online.
+          </div>
+        )}
+        {/* Location Diagnostics */}
+        {survey.settings?.locationRequired && (
+          <div className="mb-8">
+            <LocationDiagnostics
+              location={geo}
+              loading={geoLoading}
+              error={geoError}
+            />
+          </div>
+        )}
+
+        {/* Location Error with Retry/Manual Entry */}
+        {survey.settings?.locationRequired && geoError && !manualLocation && (
+          <div className="mb-8 rounded-control border-[1.5px] border-red-300 bg-red-50 p-4 space-y-3">
+            <p className="text-sm text-red-700">{geoError}</p>
+            <div className="flex gap-3">
+              <button
+                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-control text-sm font-medium transition-all duration-200 ease-out focus-visible:outline-none focus-visible:shadow-focus-ring border-[1.5px] border-[var(--gform-color-border)] bg-surface hover:bg-surface-alt min-h-[48px] px-6 py-3"
               onClick={() => {
                 if (navigator?.geolocation) {
                   navigator.geolocation.getCurrentPosition(
@@ -401,26 +431,28 @@ export default function PublicSurveyPage({ params }: { params: { id: string } })
               }}
               type="button"
             >
-              Retry Location
-            </button>
-            <button
-              className="btn btn-sm"
-              onClick={() => setManualLocation(true)}
-              type="button"
-            >
-              Enter Manually
-            </button>
+                Retry Location
+              </button>
+              <button
+                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-control text-sm font-medium transition-all duration-200 ease-out focus-visible:outline-none focus-visible:shadow-focus-ring border-[1.5px] border-[var(--gform-color-border)] bg-surface hover:bg-surface-alt min-h-[48px] px-6 py-3"
+                onClick={() => setManualLocation(true)}
+                type="button"
+              >
+                Enter Manually
+              </button>
+            </div>
           </div>
-        </div>
-      )}
-      {survey.settings?.locationRequired && manualLocation && !geo && (
-        <div className="rounded-md border border-blue-300 bg-blue-50 p-3 space-y-3">
-          <p className="text-sm text-blue-700">Enter your location manually:</p>
-          <div className="grid grid-cols-2 gap-3">
-            <input
-              type="number"
-              className="input text-sm"
-              placeholder="Latitude (e.g., 40.7128)"
+        )}
+
+        {/* Manual Location Entry */}
+        {survey.settings?.locationRequired && manualLocation && !geo && (
+          <div className="mb-8 rounded-control border-[1.5px] border-blue-300 bg-blue-50 p-4 space-y-4">
+            <p className="text-sm text-blue-700">Enter your location manually:</p>
+            <div className="grid grid-cols-2 gap-3">
+              <input
+                type="number"
+                className="flex min-h-[48px] w-full rounded-control border-[1.5px] border-[var(--gform-color-border)] bg-surface px-4 py-3 text-base text-[var(--gform-color-text)] transition-all duration-200 placeholder:text-[var(--gform-color-text-tertiary)] focus-visible:outline-none focus-visible:border-purple focus-visible:shadow-focus-ring"
+                placeholder="Latitude (e.g., 40.7128)"
               step="any"
               id="manual-lat"
               onBlur={(e) => {
@@ -431,11 +463,11 @@ export default function PublicSurveyPage({ params }: { params: { id: string } })
                   setGeoError(null)
                 }
               }}
-            />
-            <input
-              type="number"
-              className="input text-sm"
-              placeholder="Longitude (e.g., -74.0060)"
+              />
+              <input
+                type="number"
+                className="flex min-h-[48px] w-full rounded-control border-[1.5px] border-[var(--gform-color-border)] bg-surface px-4 py-3 text-base text-[var(--gform-color-text)] transition-all duration-200 placeholder:text-[var(--gform-color-text-tertiary)] focus-visible:outline-none focus-visible:border-purple focus-visible:shadow-focus-ring"
+                placeholder="Longitude (e.g., -74.0060)"
               step="any"
               id="manual-lon"
               onBlur={(e) => {
@@ -446,150 +478,56 @@ export default function PublicSurveyPage({ params }: { params: { id: string } })
                   setGeoError(null)
                 }
               }}
+              />
+            </div>
+            <button
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-control text-sm font-medium transition-all duration-200 ease-out focus-visible:outline-none focus-visible:shadow-focus-ring border-[1.5px] border-[var(--gform-color-border)] bg-surface hover:bg-surface-alt min-h-[48px] px-6 py-3"
+              onClick={() => setManualLocation(false)}
+              type="button"
+            >
+              Use Device Location Instead
+            </button>
+          </div>
+        )}
+
+        {/* Survey Form */}
+        <form className="space-y-12" onSubmit={form.handleSubmit(onSubmit)}>
+          {visibleQuestions.map((q, index) => {
+            // Apply piping to question text and description
+            const pipedQuestion = {
+              ...q,
+              question: applyPiping(q.question, pipingContext),
+              description: q.description ? applyPiping(q.description, pipingContext) : undefined
+            }
+
+            return (
+              <SurveyQuestionRenderer
+                key={q.id}
+                question={pipedQuestion}
+                questionNumber={index + 1}
+                showQuestionNumber={visibleQuestions.length > 1}
+                register={form.register}
+                setValue={form.setValue}
+                watch={form.watch}
+                error={form.formState.errors[q.id] as any}
+                geo={geo}
+              />
+            )
+          })}
+
+          {/* Submit Button */}
+          <div className="pt-4">
+            <SurveySubmitButton
+              state={submitState}
+              errorMessage={submitError}
+              onReset={() => {
+                setSubmitState('default')
+                setSubmitError('')
+              }}
             />
           </div>
-          <button
-            className="btn btn-sm"
-            onClick={() => setManualLocation(false)}
-            type="button"
-          >
-            Use Device Location Instead
-          </button>
-        </div>
-      )}
-      <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
-        {visibleQuestions.map((q) => {
-          const val = q.validation
-          const questionText = applyPiping(q.question, pipingContext)
-          const descriptionText = q.description ? applyPiping(q.description, pipingContext) : null
-
-          return (
-            <div key={q.id} className="space-y-2">
-              <label className="block text-sm font-medium">
-                {questionText} {q.required && <span className="text-red-600">*</span>}
-              </label>
-              {descriptionText && <p className="text-xs text-gray-600">{descriptionText}</p>}
-
-              {q.type === 'text' && (
-                <input className="input" {...form.register(q.id)} />
-              )}
-              {q.type === 'textarea' && (
-                <textarea className="input" rows={4} {...form.register(q.id)} />
-              )}
-              {q.type === 'number' && (
-                <input
-                  type="number"
-                  className="input"
-                  min={val?.minValue}
-                  max={val?.maxValue}
-                  {...form.register(q.id)}
-                />
-              )}
-              {q.type === 'email' && (
-                <input type="email" className="input" {...form.register(q.id)} />
-              )}
-              {q.type === 'phone' && (
-                <input type="tel" className="input" placeholder="e.g., +1 234 567 8900" {...form.register(q.id)} />
-              )}
-              {(q.type === 'single_choice' || q.type === 'dropdown') && Array.isArray(q.options) && (
-                <select className="input" {...form.register(q.id)}>
-                  <option value="">Select…</option>
-                  {q.options.map((o: string) => (
-                    <option key={o} value={o}>{o}</option>
-                  ))}
-                </select>
-              )}
-              {q.type === 'multiple_choice' && Array.isArray(q.options) && (
-                <div className="space-y-1">
-                  {q.options.map((o: string) => (
-                    <label key={o} className="flex items-center gap-2 text-sm">
-                      <input type="checkbox" value={o} {...form.register(q.id)} /> {o}
-                    </label>
-                  ))}
-                </div>
-              )}
-              {q.type === 'rating' && (
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5].map((r) => (
-                    <label key={r} className="flex items-center gap-1 cursor-pointer">
-                      <input type="radio" value={r} {...form.register(q.id)} />
-                      <span className="text-sm">{r}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
-              {q.type === 'scale' && (
-                <div className="space-y-2">
-                  <input
-                    type="range"
-                    min={val?.scaleMin ?? 1}
-                    max={val?.scaleMax ?? 10}
-                    step={val?.scaleStep ?? 1}
-                    className="w-full"
-                    {...form.register(q.id)}
-                    onChange={(e) => form.setValue(q.id, e.target.value)}
-                  />
-                  <div className="flex justify-between text-xs text-gray-600">
-                    <span>{val?.scaleMinLabel || val?.scaleMin || 1}</span>
-                    <span className="font-semibold">{form.watch(q.id) || (val?.scaleMin ?? 1)}</span>
-                    <span>{val?.scaleMaxLabel || val?.scaleMax || 10}</span>
-                  </div>
-                </div>
-              )}
-              {q.type === 'date' && (
-                <input type="date" className="input" {...form.register(q.id)} />
-              )}
-              {q.type === 'time' && (
-                <input type="time" className="input" {...form.register(q.id)} />
-              )}
-              {q.type === 'datetime' && (
-                <input type="datetime-local" className="input" {...form.register(q.id)} />
-              )}
-              {q.type === 'file_upload' && (
-                <div className="space-y-1">
-                  <input
-                    type="file"
-                    className="input"
-                    accept={val?.allowedFileTypes?.join(',')}
-                    {...form.register(q.id)}
-                  />
-                  {(val?.maxFileSize || val?.allowedFileTypes) && (
-                    <p className="text-xs text-gray-500">
-                      {val.maxFileSize && `Max size: ${val.maxFileSize}MB`}
-                      {val.maxFileSize && val.allowedFileTypes && ' • '}
-                      {val.allowedFileTypes && `Allowed: ${val.allowedFileTypes.map(t => t.split('/')[1]).join(', ')}`}
-                    </p>
-                  )}
-                </div>
-              )}
-              {q.type === 'signature' && (
-                <div className="border rounded p-2 bg-gray-50">
-                  <p className="text-xs text-gray-600 mb-2">Sign below:</p>
-                  <input
-                    type="text"
-                    className="input font-signature"
-                    placeholder="Type your signature"
-                    {...form.register(q.id)}
-                  />
-                </div>
-              )}
-              {q.type === 'location' && (
-                <div className="border rounded p-3 bg-gray-50">
-                  <p className="text-xs text-gray-600">Location will be captured from your device</p>
-                  {geo && (
-                    <p className="text-xs text-green-600 mt-1">✓ Location captured</p>
-                  )}
-                </div>
-              )}
-
-              {form.formState.errors[q.id] && (
-                <p className="text-sm text-red-600">{(form.formState.errors as any)[q.id]?.message as string}</p>
-              )}
-            </div>
-          )
-        })}
-        <button className="btn" type="submit" disabled={submitting}>{submitting ? 'Submitting…' : 'Submit'}</button>
-      </form>
+        </form>
+      </div>
     </div>
   )
 }

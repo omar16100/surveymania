@@ -1,0 +1,231 @@
+<testsuites id="" name="" tests="7" failures="6" skipped="0" errors="0" time="187.977454">
+<testsuite name="auth/auth.spec.ts" timestamp="2025-11-12T13:18:29.511Z" hostname="chromium" tests="7" failures="6" skipped="0" time="143.817" errors="0">
+<testcase name="Authentication › should display sign-in page" classname="auth/auth.spec.ts" time="21.523">
+<failure message="auth.spec.ts:5:7 should display sign-in page" type="FAILURE">
+<![CDATA[  [chromium] › auth/auth.spec.ts:5:7 › Authentication › should display sign-in page ────────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('input[type="email"]')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for locator('input[type="email"]')
+
+
+       6 |     await page.goto('/sign-in');
+       7 |     await expect(page).toHaveTitle(/SurveyMania/i);
+    >  8 |     await expect(page.locator('input[type="email"]')).toBeVisible();
+         |                                                       ^
+       9 |     await expect(page.locator('text=Sign in to')).toBeVisible();
+      10 |   });
+      11 |
+        at /Users/3001927/personal/surveymania/tests/e2e/auth/auth.spec.ts:8:55
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/auth-auth-Authentication-should-display-sign-in-page-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/auth-auth-Authentication-should-display-sign-in-page-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/auth-auth-Authentication-should-display-sign-in-page-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|auth-auth-Authentication-should-display-sign-in-page-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|auth-auth-Authentication-should-display-sign-in-page-chromium/video.webm]]
+
+[[ATTACHMENT|auth-auth-Authentication-should-display-sign-in-page-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Authentication › should sign in with valid credentials" classname="auth/auth.spec.ts" time="35.576">
+<failure message="auth.spec.ts:12:7 should sign in with valid credentials" type="FAILURE">
+<![CDATA[  [chromium] › auth/auth.spec.ts:12:7 › Authentication › should sign in with valid credentials ─────
+
+    Error: page.evaluate: Error: Clerk: Failed to sign in: Password has been found in an online data breach. For account safety, please reset your password.
+        at eval (eval at evaluate (:290:30), <anonymous>:9:631)
+        at async <anonymous>:316:30
+        at eval (eval at evaluate (:290:30), <anonymous>:9:631)
+        at async <anonymous>:316:30
+        at Object.b (/Users/3001927/personal/surveymania/node_modules/@clerk/testing/src/playwright/helpers.ts:158:16)
+        at signIn (/Users/3001927/personal/surveymania/tests/fixtures/auth.ts:43:3)
+        at signInAsUser1 (/Users/3001927/personal/surveymania/tests/fixtures/auth.ts:60:3)
+        at /Users/3001927/personal/surveymania/tests/e2e/auth/auth.spec.ts:13:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/auth-auth-Authentication-s-ffea6-n-in-with-valid-credentials-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/auth-auth-Authentication-s-ffea6-n-in-with-valid-credentials-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/auth-auth-Authentication-s-ffea6-n-in-with-valid-credentials-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|auth-auth-Authentication-s-ffea6-n-in-with-valid-credentials-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|auth-auth-Authentication-s-ffea6-n-in-with-valid-credentials-chromium/video.webm]]
+
+[[ATTACHMENT|auth-auth-Authentication-s-ffea6-n-in-with-valid-credentials-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Authentication › should show error for invalid credentials" classname="auth/auth.spec.ts" time="30.19">
+<failure message="auth.spec.ts:22:7 should show error for invalid credentials" type="FAILURE">
+<![CDATA[  [chromium] › auth/auth.spec.ts:22:7 › Authentication › should show error for invalid credentials ─
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('input[type="email"]') to be visible
+
+
+      24 |
+      25 |     // Wait for form to load
+    > 26 |     await page.waitForSelector('input[type="email"]');
+         |                ^
+      27 |
+      28 |     // Fill in invalid credentials
+      29 |     await page.fill('input[type="email"]', 'invalid@example.com');
+        at /Users/3001927/personal/surveymania/tests/e2e/auth/auth.spec.ts:26:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/auth-auth-Authentication-s-8012a-ror-for-invalid-credentials-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/auth-auth-Authentication-s-8012a-ror-for-invalid-credentials-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/auth-auth-Authentication-s-8012a-ror-for-invalid-credentials-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|auth-auth-Authentication-s-8012a-ror-for-invalid-credentials-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|auth-auth-Authentication-s-8012a-ror-for-invalid-credentials-chromium/video.webm]]
+
+[[ATTACHMENT|auth-auth-Authentication-s-8012a-ror-for-invalid-credentials-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Authentication › should sign out successfully" classname="auth/auth.spec.ts" time="35.916">
+<failure message="auth.spec.ts:37:7 should sign out successfully" type="FAILURE">
+<![CDATA[  [chromium] › auth/auth.spec.ts:37:7 › Authentication › should sign out successfully ──────────────
+
+    Error: page.evaluate: Error: Clerk: Failed to sign in: Password has been found in an online data breach. For account safety, please reset your password.
+        at eval (eval at evaluate (:290:30), <anonymous>:9:631)
+        at async <anonymous>:316:30
+        at eval (eval at evaluate (:290:30), <anonymous>:9:631)
+        at async <anonymous>:316:30
+        at Object.b (/Users/3001927/personal/surveymania/node_modules/@clerk/testing/src/playwright/helpers.ts:158:16)
+        at signIn (/Users/3001927/personal/surveymania/tests/fixtures/auth.ts:43:3)
+        at signInAsUser1 (/Users/3001927/personal/surveymania/tests/fixtures/auth.ts:60:3)
+        at /Users/3001927/personal/surveymania/tests/e2e/auth/auth.spec.ts:39:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/auth-auth-Authentication-should-sign-out-successfully-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/auth-auth-Authentication-should-sign-out-successfully-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/auth-auth-Authentication-should-sign-out-successfully-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|auth-auth-Authentication-should-sign-out-successfully-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|auth-auth-Authentication-should-sign-out-successfully-chromium/video.webm]]
+
+[[ATTACHMENT|auth-auth-Authentication-should-sign-out-successfully-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Authentication › should persist session after page reload" classname="auth/auth.spec.ts" time="10.361">
+<failure message="auth.spec.ts:48:7 should persist session after page reload" type="FAILURE">
+<![CDATA[  [chromium] › auth/auth.spec.ts:48:7 › Authentication › should persist session after page reload ──
+
+    Error: page.evaluate: Error: Clerk: Failed to sign in: Password has been found in an online data breach. For account safety, please reset your password.
+        at eval (eval at evaluate (:290:30), <anonymous>:9:631)
+        at async <anonymous>:316:30
+        at eval (eval at evaluate (:290:30), <anonymous>:9:631)
+        at async <anonymous>:316:30
+        at Object.b (/Users/3001927/personal/surveymania/node_modules/@clerk/testing/src/playwright/helpers.ts:158:16)
+        at signIn (/Users/3001927/personal/surveymania/tests/fixtures/auth.ts:43:3)
+        at signInAsUser1 (/Users/3001927/personal/surveymania/tests/fixtures/auth.ts:60:3)
+        at /Users/3001927/personal/surveymania/tests/e2e/auth/auth.spec.ts:49:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/auth-auth-Authentication-s-3ba11-t-session-after-page-reload-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/auth-auth-Authentication-s-3ba11-t-session-after-page-reload-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/auth-auth-Authentication-s-3ba11-t-session-after-page-reload-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|auth-auth-Authentication-s-3ba11-t-session-after-page-reload-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|auth-auth-Authentication-s-3ba11-t-session-after-page-reload-chromium/video.webm]]
+
+[[ATTACHMENT|auth-auth-Authentication-s-3ba11-t-session-after-page-reload-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Authentication › should redirect to sign-in when accessing protected routes" classname="auth/auth.spec.ts" time="4.041">
+</testcase>
+<testcase name="Authentication › should allow switching between users" classname="auth/auth.spec.ts" time="6.21">
+<failure message="auth.spec.ts:67:7 should allow switching between users" type="FAILURE">
+<![CDATA[  [chromium] › auth/auth.spec.ts:67:7 › Authentication › should allow switching between users ──────
+
+    Error: page.evaluate: Error: Clerk: Failed to sign in: Password has been found in an online data breach. For account safety, please reset your password.
+        at eval (eval at evaluate (:290:30), <anonymous>:9:631)
+        at async <anonymous>:316:30
+        at eval (eval at evaluate (:290:30), <anonymous>:9:631)
+        at async <anonymous>:316:30
+        at Object.b (/Users/3001927/personal/surveymania/node_modules/@clerk/testing/src/playwright/helpers.ts:158:16)
+        at signIn (/Users/3001927/personal/surveymania/tests/fixtures/auth.ts:43:3)
+        at signInAsUser1 (/Users/3001927/personal/surveymania/tests/fixtures/auth.ts:60:3)
+        at /Users/3001927/personal/surveymania/tests/e2e/auth/auth.spec.ts:69:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/auth-auth-Authentication-s-15fe1-low-switching-between-users-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/auth-auth-Authentication-s-15fe1-low-switching-between-users-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/auth-auth-Authentication-s-15fe1-low-switching-between-users-chromium/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|auth-auth-Authentication-s-15fe1-low-switching-between-users-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|auth-auth-Authentication-s-15fe1-low-switching-between-users-chromium/video.webm]]
+
+[[ATTACHMENT|auth-auth-Authentication-s-15fe1-low-switching-between-users-chromium/error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+</testsuites>

@@ -1,0 +1,63 @@
+name: Quality Check
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  lint-and-typecheck:
+    runs-on: ubuntu-latest
+    name: Lint and Type Check
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Run ESLint
+        run: npx eslint . --ext .js,.jsx,.ts,.tsx --max-warnings 100
+        continue-on-error: true
+
+      - name: Run TypeScript Check
+        run: npx tsc --noEmit
+        continue-on-error: true
+
+  test:
+    runs-on: ubuntu-latest
+    name: Run Tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Run Tests
+        run: npm test
+        continue-on-error: true

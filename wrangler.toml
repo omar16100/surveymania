@@ -1,6 +1,6 @@
 name = "surveymania"
 main = ".open-next/worker.js"
-compatibility_date = "2024-12-30"
+compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
 [assets]
@@ -19,4 +19,22 @@ bucket_name = "surveymania-cache"
 
 [vars]
 NEXT_PUBLIC_APP_URL = "https://surveymania.omarshabab55.workers.dev"
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = "pk_test_YmVjb21pbmctcmFtLTYxLmNsZXJrLmFjY291bnRzLmRldiQ"
+
+# Staging Environment
+[env.staging]
+name = "surveymania-staging"
+
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "surveymania-staging"
+# TODO: Replace with actual database_id after running: wrangler d1 create surveymania-staging
+database_id = "REPLACE_WITH_STAGING_DB_ID"
+
+[[env.staging.r2_buckets]]
+binding = "BUCKET"
+bucket_name = "surveymania-cache-staging"
+
+[env.staging.vars]
+NEXT_PUBLIC_APP_URL = "https://surveymania-staging.omarshabab55.workers.dev"
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = "pk_test_YmVjb21pbmctcmFtLTYxLmNsZXJrLmFjY291bnRzLmRldiQ"
