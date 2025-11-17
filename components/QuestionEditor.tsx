@@ -7,6 +7,7 @@ import { Label } from '@/components/ui'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui'
 import { Card, CardContent, CardHeader } from '@/lib/components/ui/card'
 import { Badge } from '@/components/ui'
+import { QuestionTypeSelector } from '@/components/QuestionTypeSelector'
 import LogicBuilder from '@/components/LogicBuilder'
 import type { QuestionLogic } from '@/lib/logic-engine'
 import { GripVertical, ChevronUp, ChevronDown, Trash2 } from 'lucide-react'
@@ -33,37 +34,37 @@ const TYPES: { label: string; value: QuestionType; group: string }[] = [
 
 export function QuestionEditor() {
   const { questions, addQuestion, removeQuestion, updateQuestion, reorder } = useSurveyBuilder()
-  const [newType, setNewType] = useState<QuestionType>('text')
   const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null)
 
   const needsOptions = (type: QuestionType) => ['single_choice', 'multiple_choice', 'dropdown'].includes(type)
 
-  function add() {
+  function handleAddQuestion(type: QuestionType) {
     const q: BuilderQuestion = {
       id: crypto.randomUUID(),
-      type: newType,
+      type,
       question: '',
       required: false,
-      options: needsOptions(newType) ? ['Option 1'] : undefined,
-      validation: newType === 'scale' ? { scaleMin: 1, scaleMax: 10, scaleStep: 1 } : undefined
+      options: needsOptions(type) ? ['Option 1'] : undefined,
+      validation: type === 'scale' ? { scaleMin: 1, scaleMax: 10, scaleStep: 1 } : undefined
     }
     addQuestion(q)
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Select value={newType} onValueChange={(value) => setNewType(value as QuestionType)}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {TYPES.map((t) => (
-              <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Button onClick={add}>Add question</Button>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="font-display text-xl font-bold text-[var(--gform-color-text)]">
+            Questions
+          </h2>
+          <p className="text-sm text-[var(--gform-color-text-secondary)] mt-1">
+            {questions.length === 0
+              ? 'Add your first question to get started'
+              : `${questions.length} question${questions.length === 1 ? '' : 's'}`
+            }
+          </p>
+        </div>
+        <QuestionTypeSelector onSelect={handleAddQuestion} />
       </div>
 
       <div className="space-y-6">
