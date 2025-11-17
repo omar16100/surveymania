@@ -1,0 +1,309 @@
+// Prisma schema for Cloudflare D1 (SQLite)
+// Migrated from PostgreSQL for edge deployment
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+  engineType = "library"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  clerkId       String  @id
+  email         String
+  firstName     String
+  lastName      String
+  avatar        String
+  organization  Organization? @relation(fields: [organizationId], references: [id])
+  organizationId String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  ownedOrganizations Organization[] @relation("OrganizationOwner")
+  surveysCreated     Survey[]        @relation("SurveyCreator")
+  campaignsCreated   Campaign[]      @relation("CampaignCreator")
+  campaignMemberships CampaignMember[]
+  exportsCreated     Export[]        @relation("ExportCreator")
+  orgMemberships     OrganizationMember[]
+  responses          SurveyResponse[]
+  comments           Comment[]       @relation("CommentAuthor")
+  resolvedComments   Comment[]       @relation("CommentResolver")
+  sentInvites        Invite[]        @relation("InviteSender")
+  dashboards         Dashboard[]
+  assignedTerritories Territory[]    @relation("TerritoryAssignee")
+  createdTerritories Territory[]     @relation("TerritoryCreator")
+}
+
+model Organization {
+  id        String @id @default(uuid())
+  name      String
+  slug      String  @unique
+  ownerId   String
+  owner     User   @relation("OrganizationOwner", fields: [ownerId], references: [clerkId])
+  settings  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  users      User[]
+  surveys    Survey[]
+  members    OrganizationMember[]
+  invites    Invite[]
+  dashboards Dashboard[]
+}
+
+model OrganizationMember {
+  id              String        @id @default(uuid())
+  organizationId  String
+  organization    Organization  @relation(fields: [organizationId], references: [id])
+  userId          String
+  user            User          @relation(fields: [userId], references: [clerkId])
+  role            String       @default("member")
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@unique([organizationId, userId], map: "uniq_org_member")
+}
+
+model Survey {
+  id             String       @id @default(uuid())
+  title          String
+  description    String
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  createdBy      String
+  creator        User         @relation("SurveyCreator", fields: [createdBy], references: [clerkId])
+  status         String @default("draft")
+  settings       String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  publishedAt    DateTime?
+  closedAt       DateTime?
+
+  // Relations
+  questions  SurveyQuestion[]
+  responses  SurveyResponse[]
+  campaigns  Campaign[]
+  exports    Export[]
+  dashboards Dashboard[]
+
+  @@index([organizationId], map: "idx_survey_org")
+}
+
+model SurveyQuestion {
+  id          String       @id @default(uuid())
+  surveyId    String
+  survey      Survey       @relation(fields: [surveyId], references: [id])
+  order       Int
+  type        String
+  question    String
+  description String?
+  required    Boolean
+  validation  String?
+  options     String?
+  logic       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  answers SurveyAnswer[]
+
+  @@index([surveyId], map: "idx_question_survey")
+}
+
+model SurveyResponse {
+  id               String         @id @default(uuid())
+  surveyId         String
+  survey           Survey         @relation(fields: [surveyId], references: [id])
+  respondentId     String?
+  respondent       User?          @relation(fields: [respondentId], references: [clerkId])
+  sessionId        String
+  status           String @default("in_progress")
+  latitude         Float?
+  longitude        Float?
+  locationAccuracy Float?
+  address          String?
+  city             String?
+  country          String?
+  geocodedAt       DateTime?
+  ipAddress        String?
+  userAgent        String?
+  metadata         String
+  startedAt        DateTime @default(now())
+  completedAt      DateTime?
+  submittedAt      DateTime?
+
+  answers  SurveyAnswer[]
+  comments Comment[]
+
+  @@index([respondentId], map: "idx_response_user")
+}
+
+model SurveyAnswer {
+  id             String      @id @default(uuid())
+  responseId     String
+  response       SurveyResponse @relation(fields: [responseId], references: [id])
+  questionId     String
+  question       SurveyQuestion @relation(fields: [questionId], references: [id])
+  answerType     String
+  answerText     String?
+  answerNumber   Float?
+  answerChoices  String
+  answerFile     String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Campaign {
+  id          String        @id @default(uuid())
+  surveyId    String
+  survey      Survey        @relation(fields: [surveyId], references: [id])
+  name        String
+  description String?
+  targetCount Int?
+  status      String @default("draft")
+  settings    String
+  geofence    String?
+  createdBy   String
+  creator     User          @relation("CampaignCreator", fields: [createdBy], references: [clerkId])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members     CampaignMember[]
+  exports     Export[]
+  territories Territory[]
+}
+
+model CampaignMember {
+  id             String   @id @default(uuid())
+  campaignId     String
+  campaign       Campaign @relation(fields: [campaignId], references: [id])
+  userId         String
+  user           User     @relation(fields: [userId], references: [clerkId])
+  role           String
+  assignedRegion String?
+  permissions    String
+  invitedBy      String
+  invitedAt      DateTime @default(now())
+  joinedAt       DateTime?
+  status         String
+}
+
+model Export {
+  id         String       @id @default(uuid())
+  surveyId   String
+  survey     Survey       @relation(fields: [surveyId], references: [id])
+  campaignId String?
+  campaign   Campaign?    @relation(fields: [campaignId], references: [id])
+  format     String
+  filters    String
+  fileUrl    String
+  fileSize   Int
+  status     String @default("processing")
+  createdBy  String
+  creator    User         @relation("ExportCreator", fields: [createdBy], references: [clerkId])
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime
+}
+
+model Comment {
+  id           String          @id @default(uuid())
+  content      String
+  responseId   String
+  response     SurveyResponse  @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  authorId     String
+  author       User            @relation("CommentAuthor", fields: [authorId], references: [clerkId])
+  parentId     String?
+  parent       Comment?        @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies      Comment[]       @relation("CommentReplies")
+  isResolved   Boolean         @default(false)
+  resolvedAt   DateTime?
+  resolvedById String?
+  resolvedBy   User?           @relation("CommentResolver", fields: [resolvedById], references: [clerkId])
+  mentions     String
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@index([responseId], map: "idx_comment_response")
+  @@index([authorId], map: "idx_comment_author")
+}
+
+model Invite {
+  id             String        @id @default(uuid())
+  email          String
+  token          String        @unique
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  role           String       @default("member")
+  invitedById    String
+  invitedBy      User          @relation("InviteSender", fields: [invitedById], references: [clerkId])
+  status         String  @default("pending")
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([organizationId], map: "idx_invite_org")
+  @@index([email], map: "idx_invite_email")
+  @@index([token], map: "idx_invite_token")
+}
+
+model Dashboard {
+  id             String        @id @default(uuid())
+  surveyId       String
+  survey         Survey        @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User          @relation(fields: [userId], references: [clerkId])
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  name           String
+  description    String?
+  layout         String        @default("{}")
+  isPublic       Boolean       @default(false)
+  publicToken    String?       @unique
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  widgets DashboardWidget[]
+
+  @@index([surveyId], map: "idx_dashboard_survey")
+  @@index([userId], map: "idx_dashboard_user")
+  @@index([publicToken], map: "idx_dashboard_token")
+}
+
+model DashboardWidget {
+  id           String    @id @default(uuid())
+  dashboardId  String
+  dashboard    Dashboard @relation(fields: [dashboardId], references: [id], onDelete: Cascade)
+  type         String
+  config       String    @default("{}")
+  gridPosition String    @default("{}")
+  order        Int
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([dashboardId], map: "idx_widget_dashboard")
+}
+
+model Territory {
+  id           String    @id @default(uuid())
+  campaignId   String
+  campaign     Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  name         String
+  description  String?
+  boundary     String    // GeoJSON polygon coordinates
+  color        String    @default("#673ab7")
+  assignedToId String?
+  assignedTo   User?     @relation("TerritoryAssignee", fields: [assignedToId], references: [clerkId])
+  createdById  String
+  createdBy    User      @relation("TerritoryCreator", fields: [createdById], references: [clerkId])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([campaignId], map: "idx_territory_campaign")
+  @@index([assignedToId], map: "idx_territory_assignee")
+}

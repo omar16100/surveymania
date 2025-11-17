@@ -1,0 +1,22 @@
+name = "surveymania"
+main = ".open-next/worker.js"
+compatibility_date = "2024-12-30"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = ".open-next/assets"
+
+# D1 Database Binding
+[[d1_databases]]
+binding = "DB"
+database_name = "surveymania-prod"
+database_id = "86c125e9-d4e5-44d6-a89d-88a09730f6ae"
+
+# R2 Bucket for OpenNext incremental cache
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "surveymania-cache"
+
+[vars]
+NEXT_PUBLIC_APP_URL = "https://surveymania.omarshabab55.workers.dev"
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = "pk_test_YmVjb21pbmctcmFtLTYxLmNsZXJrLmFjY291bnRzLmRldiQ"

@@ -1,0 +1,364 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 98%;
+    --foreground: 0 0% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+    --primary: 262 52% 47%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96.5%;
+    --secondary-foreground: 0 0% 10%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 46%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 10%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 262 52% 47%;
+    --radius: 0.75rem;
+
+    /* Soft Minimal Design Tokens - Refined Palette */
+    --gform-color-primary: #673ab7;
+    --gform-color-primary-light: #9575cd;
+    --gform-color-primary-dark: #512da8;
+    --gform-color-on-primary: #ffffff;
+
+    /* Soft neutrals */
+    --gform-color-surface: #ffffff;
+    --gform-color-surface-alt: #fafafa;
+    --gform-color-surface-elevated: #f5f5f7;
+    --gform-color-background: #fafafa;
+    --gform-color-border: #e5e5e7;
+    --gform-color-border-light: #f0f0f2;
+
+    /* Rich grays */
+    --gform-color-text: #1a1a1a;
+    --gform-color-text-secondary: #4a4a4a;
+    --gform-color-text-tertiary: #8a8a8a;
+    --gform-color-text-disabled: #c0c0c0;
+
+    /* Purple tints for backgrounds */
+    --gform-bg-soft-purple-5: #f3f0ff;
+    --gform-bg-soft-purple-10: #e8e0ff;
+    --gform-bg-soft-purple-50: #f3e5f5;
+
+    /* Semantic colors - softer versions */
+    --gform-color-success: #10b981;
+    --gform-color-success-bg: #ecfdf5;
+    --gform-color-warning: #f59e0b;
+    --gform-color-warning-bg: #fffbeb;
+    --gform-color-error: #ef4444;
+    --gform-color-error-bg: #fef2f2;
+    --gform-color-info: #3b82f6;
+    --gform-color-info-bg: #eff6ff;
+
+    /* Focus ring - purple with offset */
+    --gform-color-focus: #673ab7;
+    --gform-focus-ring: 0 0 0 3px rgba(103, 58, 183, 0.12);
+    --gform-focus-ring-offset: 2px;
+
+    /* Elevation (softer shadows) */
+    --gform-elevation-0: none;
+    --gform-elevation-1: 0 1px 3px rgba(0,0,0,0.06);
+    --gform-elevation-2: 0 4px 12px rgba(0,0,0,0.08);
+    --gform-elevation-3: 0 12px 24px rgba(0,0,0,0.12);
+    --gform-elevation-lifted: 0 8px 16px rgba(0,0,0,0.1);
+
+    /* Radii - more rounded for soft aesthetic */
+    --gform-radius-card: 12px;
+    --gform-radius-control: 8px;
+    --gform-radius-modal: 16px;
+    --gform-radius-full: 9999px;
+
+    /* Spacing scale (4px base) */
+    --gform-space-1: 4px;
+    --gform-space-2: 8px;
+    --gform-space-3: 12px;
+    --gform-space-4: 16px;
+    --gform-space-5: 20px;
+    --gform-space-6: 24px;
+    --gform-space-8: 32px;
+    --gform-space-12: 48px;
+    --gform-space-16: 64px;
+    --gform-space-24: 96px;
+
+    /* Typography - Using Next.js font variables */
+    --gform-font-family-display: var(--font-plus-jakarta), 'Outfit', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --gform-font-family-body: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --gform-font-family-mono: var(--font-jetbrains-mono), ui-monospace, 'Courier New', monospace;
+
+    --gform-font-weight-regular: 400;
+    --gform-font-weight-medium: 500;
+    --gform-font-weight-semibold: 600;
+    --gform-font-weight-bold: 700;
+
+    /* Typography scale */
+    --gform-font-size-xs: 12px;
+    --gform-font-size-sm: 14px;
+    --gform-font-size-base: 16px;
+    --gform-font-size-lg: 20px;
+    --gform-font-size-xl: 24px;
+    --gform-font-size-2xl: 32px;
+    --gform-font-size-3xl: 48px;
+
+    --gform-line-height-tight: 1.25;
+    --gform-line-height-normal: 1.5;
+    --gform-line-height-relaxed: 1.6;
+
+    /* Letter spacing for display text */
+    --gform-letter-spacing-tight: -0.02em;
+    --gform-letter-spacing-normal: 0;
+  }
+
+  .dark {
+    --background: 0 0% 10%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 16%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 16%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 262 47% 65%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 20%;
+    --muted-foreground: 0 0% 64%;
+    --accent: 0 0% 20%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 24%;
+    --input: 0 0% 24%;
+    --ring: 262 47% 65%;
+
+    /* Dark mode overrides */
+    --gform-color-primary: #9575cd;
+    --gform-color-surface: #1a1a1a;
+    --gform-color-surface-alt: #2a2a2a;
+    --gform-color-surface-elevated: #333333;
+    --gform-color-background: #1a1a1a;
+    --gform-color-border: #3a3a3a;
+    --gform-color-border-light: #2f2f2f;
+    --gform-color-text: #f0f0f0;
+    --gform-color-text-secondary: #c0c0c0;
+    --gform-color-text-tertiary: #8a8a8a;
+    --gform-bg-soft-purple-5: #2a2438;
+    --gform-bg-soft-purple-10: #352d4d;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-[var(--gform-color-background)] text-[var(--gform-color-text)] antialiased;
+    font-family: var(--gform-font-family-body);
+    line-height: var(--gform-line-height-relaxed);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--gform-font-family-display);
+    letter-spacing: var(--gform-letter-spacing-tight);
+    font-weight: var(--gform-font-weight-bold);
+    line-height: var(--gform-line-height-tight);
+    color: var(--gform-color-text);
+  }
+}
+
+@layer components {
+  /* Button variants - Soft minimal style */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2
+           font-medium text-sm
+           transition-all duration-200 ease-out
+           disabled:opacity-50 disabled:cursor-not-allowed
+           focus:outline-none;
+    border-radius: var(--gform-radius-control);
+    padding: 12px 24px;
+    min-height: 48px;
+  }
+
+  .btn:focus-visible {
+    box-shadow: var(--gform-focus-ring);
+    outline-offset: var(--gform-focus-ring-offset);
+  }
+
+  .btn-primary {
+    background: var(--gform-color-primary);
+    color: var(--gform-color-on-primary);
+    box-shadow: var(--gform-elevation-1);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: var(--gform-color-primary-dark);
+    box-shadow: var(--gform-elevation-2);
+  }
+
+  .btn-secondary {
+    background: var(--gform-color-surface);
+    color: var(--gform-color-text);
+    border: 1.5px solid var(--gform-color-border);
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--gform-color-surface-alt);
+    border-color: var(--gform-color-text-tertiary);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--gform-color-text-secondary);
+  }
+
+  .btn-ghost:hover:not(:disabled) {
+    background: var(--gform-color-surface-alt);
+    color: var(--gform-color-text);
+  }
+
+  .btn-text {
+    background: transparent;
+    color: var(--gform-color-primary);
+    min-height: auto;
+    padding: 8px 12px;
+  }
+
+  .btn-text:hover:not(:disabled) {
+    background: var(--gform-bg-soft-purple-5);
+  }
+
+  /* Input base class - Soft minimal */
+  .input {
+    width: 100%;
+    border-radius: var(--gform-radius-control);
+    border: 1.5px solid var(--gform-color-border);
+    background: var(--gform-color-surface);
+    color: var(--gform-color-text);
+    font-size: var(--gform-font-size-base);
+    padding: 12px 16px;
+    min-height: 48px;
+    transition: all 200ms ease-out;
+  }
+
+  .input::placeholder {
+    color: var(--gform-color-text-tertiary);
+  }
+
+  .input:focus {
+    outline: none;
+    border-color: var(--gform-color-primary);
+    box-shadow: var(--gform-focus-ring);
+  }
+
+  .input:disabled {
+    background: var(--gform-color-surface-elevated);
+    color: var(--gform-color-text-disabled);
+    cursor: not-allowed;
+  }
+
+  /* Card elevation variants - Softer shadows */
+  .card {
+    background: var(--gform-color-surface);
+    border-radius: var(--gform-radius-card);
+    box-shadow: var(--gform-elevation-1);
+    transition: all 200ms ease-out;
+  }
+
+  .card-hover {
+    cursor: pointer;
+  }
+
+  .card-hover:hover {
+    box-shadow: var(--gform-elevation-2);
+    transform: translateY(-2px);
+  }
+
+  .card-selected {
+    box-shadow: var(--gform-elevation-3);
+    position: relative;
+    background: var(--gform-bg-soft-purple-5);
+    border: 1.5px solid var(--gform-color-primary-light);
+  }
+
+  /* Purple accent bar for selected cards */
+  .card-selected::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--gform-color-primary);
+    border-radius: var(--gform-radius-card) 0 0 var(--gform-radius-card);
+  }
+
+  /* Form header band - Softer styling */
+  .form-header {
+    background: linear-gradient(135deg, var(--gform-color-primary) 0%, var(--gform-color-primary-dark) 100%);
+    color: var(--gform-color-on-primary);
+    padding: var(--gform-space-8) var(--gform-space-8);
+    border-radius: var(--gform-radius-card) var(--gform-radius-card) 0 0;
+    margin: calc(var(--gform-space-8) * -1) calc(var(--gform-space-8) * -1) var(--gform-space-6);
+  }
+
+  /* Drag handle - Softer interaction */
+  .drag-handle {
+    @apply flex items-center justify-center
+           cursor-grab active:cursor-grabbing
+           transition-all duration-200;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--gform-radius-control);
+    color: var(--gform-color-text-tertiary);
+  }
+
+  .drag-handle:hover {
+    background: var(--gform-color-surface-elevated);
+    color: var(--gform-color-text-secondary);
+  }
+
+  /* Progress bar - 4px height, floating style */
+  .progress-bar {
+    height: 4px;
+    background: var(--gform-color-surface-elevated);
+    border-radius: var(--gform-radius-full);
+    overflow: hidden;
+  }
+
+  .progress-bar__fill {
+    height: 100%;
+    background: var(--gform-color-primary);
+    transition: width 300ms ease-out;
+    border-radius: var(--gform-radius-full);
+  }
+
+  /* Empty state styling */
+  .empty-state {
+    text-align: center;
+    padding: var(--gform-space-16) var(--gform-space-6);
+    color: var(--gform-color-text-secondary);
+  }
+
+  .empty-state-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto var(--gform-space-6);
+    color: var(--gform-color-text-tertiary);
+  }
+
+  /* Focus ring utility */
+  .focus-ring {
+    @apply focus:outline-none;
+    box-shadow: var(--gform-focus-ring);
+    outline-offset: var(--gform-focus-ring-offset);
+  }
+}
+
