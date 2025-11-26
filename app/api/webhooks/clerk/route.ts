@@ -5,7 +5,7 @@ import { getDB } from '@/lib/db'
 import { WebhookEvent } from '@clerk/nextjs/server'
 
 export const dynamic = 'force-dynamic'
-export const runtime = 'edge'
+export const runtime = 'nodejs'
 
 /**
  * Clerk webhook endpoint for user synchronization
