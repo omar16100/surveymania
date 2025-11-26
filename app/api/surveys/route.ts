@@ -36,7 +36,7 @@ const createSurveySchema = z.object({
 
 export async function GET() {
   const prisma = getDB();
-try {
+  try {
     const user = await requireUser()
     const me = await prisma.user.findUnique({ where: { clerkId: user.id }, select: { organizationId: true } })
     const surveys = await prisma.survey.findMany({
@@ -53,13 +53,14 @@ try {
     })
     return NextResponse.json(surveys)
   } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 })
+    const status = e.message === 'Unauthorized' ? 401 : 500
+    return NextResponse.json({ error: e.message }, { status })
   }
 }
 
 export async function POST(req: Request) {
   const prisma = getDB();
-try {
+  try {
     const user = await requireUser()
     const json = await req.json()
     const body = createSurveySchema.parse(json)

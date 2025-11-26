@@ -33,8 +33,11 @@ export default function SurveysPage() {
       setLoading(true)
       try {
         const res = await fetch('/api/surveys')
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}))
+          throw new Error(data?.error || 'Failed to load')
+        }
         const data = await res.json()
-        if (!res.ok) throw new Error(data?.error || 'Failed to load')
         setRows(data)
       } catch (e: any) {
         setError(e.message)
@@ -63,8 +66,8 @@ export default function SurveysPage() {
       if (res.ok) {
         setRows((s) => s.map((r) => (r.id === id ? { ...r, status: newStatus } as Survey : r)))
       } else {
-        const data = await res.json()
-        alert(`Failed to update status: ${data.error || 'Unknown error'}`)
+        const data = await res.json().catch(() => ({}))
+        alert(`Failed to update status: ${data?.error || 'Unknown error'}`)
       }
     } catch (e: any) {
       alert(`Failed to update status: ${e.message}`)
@@ -72,9 +75,20 @@ export default function SurveysPage() {
   }
 
   async function duplicate(id: string) {
-    await fetch(`/api/surveys/${id}/duplicate`, { method: 'POST' })
-    const res = await fetch('/api/surveys')
-    setRows(await res.json())
+    try {
+      const dupRes = await fetch(`/api/surveys/${id}/duplicate`, { method: 'POST' })
+      if (!dupRes.ok) {
+        const data = await dupRes.json().catch(() => ({}))
+        alert(`Failed to duplicate: ${data?.error || 'Unknown error'}`)
+        return
+      }
+      const res = await fetch('/api/surveys')
+      if (res.ok) {
+        setRows(await res.json())
+      }
+    } catch (e: any) {
+      alert(`Failed to duplicate: ${e.message}`)
+    }
   }
 
   async function remove(id: string) {
