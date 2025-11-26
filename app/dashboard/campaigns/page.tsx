@@ -32,8 +32,11 @@ export default function CampaignsPage() {
       setLoading(true)
       try {
         const res = await fetch('/api/campaigns')
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}))
+          throw new Error(data?.error || 'Failed to load')
+        }
         const data = await res.json()
-        if (!res.ok) throw new Error(data?.error || 'Failed to load')
         setCampaigns(data)
       } catch (e: any) {
         setError(e.message)
@@ -62,8 +65,8 @@ export default function CampaignsPage() {
       if (res.ok) {
         setCampaigns((c) => c.map((campaign) => (campaign.id === id ? { ...campaign, status: newStatus } : campaign)))
       } else {
-        const data = await res.json()
-        alert(`Failed to update status: ${data.error || 'Unknown error'}`)
+        const data = await res.json().catch(() => ({}))
+        alert(`Failed to update status: ${data?.error || 'Unknown error'}`)
       }
     } catch (e: any) {
       alert(`Failed to update status: ${e.message}`)

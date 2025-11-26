@@ -9,7 +9,7 @@ export type SessionUser = {
 export async function requireUser(): Promise<SessionUser> {
   const prisma = getDB()
   try {
-    const { userId } = auth()
+    const { userId } = await auth()
     if (!userId) throw new Error('Unauthorized')
     // Ensure user exists in DB
     const cu = await currentUser()
@@ -44,7 +44,7 @@ export async function requireUser(): Promise<SessionUser> {
 
 export async function optionalUser(): Promise<SessionUser | null> {
   try {
-    const { userId } = auth()
+    const { userId } = await auth()
     if (!userId) return null
     return { id: userId }
   } catch {
